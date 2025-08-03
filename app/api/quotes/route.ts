@@ -1,106 +1,73 @@
 import { NextResponse } from "next/server"
 
-// Fallback quotes in case the API fails
-const fallbackQuotes = [
+const quotes = [
   {
     text: "The only way to do great work is to love what you do.",
     author: "Steve Jobs",
+    category: "Motivation",
   },
   {
-    text: "Success is not final, failure is not fatal: it is the courage to continue that counts.",
-    author: "Winston Churchill",
+    text: "Life is what happens to you while you're busy making other plans.",
+    author: "John Lennon",
+    category: "Life",
   },
   {
     text: "The future belongs to those who believe in the beauty of their dreams.",
     author: "Eleanor Roosevelt",
+    category: "Dreams",
   },
   {
     text: "It is during our darkest moments that we must focus to see the light.",
     author: "Aristotle",
-  },
-  {
-    text: "The only impossible journey is the one you never begin.",
-    author: "Tony Robbins",
-  },
-  {
-    text: "In the middle of difficulty lies opportunity.",
-    author: "Albert Einstein",
-  },
-  {
-    text: "Believe you can and you're halfway there.",
-    author: "Theodore Roosevelt",
+    category: "Inspiration",
   },
   {
     text: "The way to get started is to quit talking and begin doing.",
     author: "Walt Disney",
+    category: "Action",
   },
   {
     text: "Don't let yesterday take up too much of today.",
     author: "Will Rogers",
+    category: "Motivation",
   },
   {
     text: "You learn more from failure than from success. Don't let it stop you. Failure builds character.",
     author: "Unknown",
+    category: "Growth",
+  },
+  {
+    text: "If you are working on something that you really care about, you don't have to be pushed. The vision pulls you.",
+    author: "Steve Jobs",
+    category: "Passion",
+  },
+  {
+    text: "Success is not final, failure is not fatal: it is the courage to continue that counts.",
+    author: "Winston Churchill",
+    category: "Perseverance",
+  },
+  {
+    text: "The only impossible journey is the one you never begin.",
+    author: "Tony Robbins",
+    category: "Beginning",
   },
 ]
 
 export async function GET() {
   try {
-    // Try to fetch from ZenQuotes API
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 8000) // 8 second timeout
+    // Return a random quote
+    const randomIndex = Math.floor(Math.random() * quotes.length)
+    const selectedQuote = quotes[randomIndex]
 
-    const response = await fetch("https://zenquotes.io/api/random", {
-      headers: {
-        "User-Agent": "Daily-Routine-App/1.0",
-        Accept: "application/json",
-      },
-      signal: controller.signal,
-    })
-
-    clearTimeout(timeoutId)
-
-    if (!response.ok) {
-      throw new Error(`ZenQuotes API responded with status: ${response.status}`)
-    }
-
-    const data = await response.json()
-
-    // ZenQuotes returns an array with one quote object
-    if (!Array.isArray(data) || data.length === 0) {
-      throw new Error("Invalid response format from ZenQuotes API")
-    }
-
-    const quote = data[0]
-
-    // Validate the response data
-    if (!quote.q || !quote.a) {
-      throw new Error("Invalid quote data from ZenQuotes API")
-    }
-
-    // Clean up the author name (remove any extra text like "type":"author")
-    let author = quote.a
-    if (author.includes(",")) {
-      author = author.split(",")[0].trim()
-    }
-
-    return NextResponse.json({
-      text: quote.q,
-      author: author,
-      source: "zenquotes",
-    })
+    return NextResponse.json(selectedQuote)
   } catch (error) {
-    console.error("Error fetching quote from ZenQuotes API:", error)
+    console.error("Error fetching quote:", error)
 
-    // Fallback to local quotes
-    const randomIndex = Math.floor(Math.random() * fallbackQuotes.length)
-    const fallbackQuote = fallbackQuotes[randomIndex]
-
+    // Return fallback quote
     return NextResponse.json({
-      text: fallbackQuote.text,
-      author: fallbackQuote.author,
-      fallback: true,
-      source: "local",
+      text: "Every day is a new beginning. Take a deep breath, smile, and start again.",
+      author: "Unknown",
+      category: "Motivation",
     })
   }
 }
